@@ -87,6 +87,34 @@ app.post('/profile', checkAuth, (req, res) => {
     res.status(200).send("Profile endpoint under construction.");
 });
 
+// T57: Profile View - Create GET route to return a specific user profile and their skills
+app.get('/profile/:userid', async (req, res) => {
+    try{
+        const {userid} = req.params
+        
+        const userProfile = await prisma.profile.findUnique({
+            where: {
+                id: userid,
+            },
+            include: {
+                profile: {
+                    include: {
+                        skills: true,
+                    },
+                }
+            },
+        });
+
+        if(!userProfile){
+            return res.status(400).send('Profile not found.')
+        }
+
+        res.send('Profile found!')
+    } catch (error) {
+        console.error("Error fetching user profile and their skills")
+    }
+});
+
 // eventually read off session instead of userId in params
 app.patch('/reset-password/:userId', checkAuth, async (req, res) => {
     try {
